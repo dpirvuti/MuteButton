@@ -1,0 +1,132 @@
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+<style>
+* {
+  font-family: "Courier New", Courier, monospace;
+}
+body {
+    background-color: rgb(146, 195, 250);
+}
+table {
+    text-align: right
+}
+table.center {
+    margin-left:auto;
+    margin-right:auto;
+  }
+th {
+    background-color: rgb(62, 101, 145);
+}
+.sectionLabel {
+    color: rgb(45, 32, 161);
+    margin-left: 40px;
+}
+button {
+  background-color: rgb(25, 15, 158);
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+</style>
+</head>
+<body>
+<div>
+    <table class="center">
+        <tr><td colspan="2" align="center"><button onclick="saveConfig()">Save</button></td></tr>
+        <tr><td colspan="2" align="center" class="sectionLabel">WiFi</td"></tr>
+        <tr><td>SSID</td><td><input type="text" id="ssid" /></td></tr>
+        <tr><td>Pswd</td><td><input type="password" id="pswd" /></td></tr>
+        <tr><td colspan="2" align="center" class="sectionLabel">WiFi Secondary</td"></tr>
+        <tr><td>SSID</td><td><input type="text" id="ssid2" /></td></tr>
+        <tr><td>Pswd</td><td><input type="password" id="pswd2" /></td></tr>
+        <tr><td colspan="2" align="center" class="sectionLabel">Multicast</td"></tr>
+        <tr><td>Address</td><td><input type="text" id="address" /></td></tr>
+        <tr><td>Port</td><td><input type="text" id="port" /></td></tr>
+    </table>
+    <br/>
+    <table id="apList" class="center">
+        <tr>
+            <th>SSID</th>
+            <th>Channel</th>
+            <th>RSSI</th>
+            <th>Auth</th>
+        </tr>
+    </table>
+</div>
+<script>
+    function saveConfig() {
+        var config = {
+            ssid:document.getElementById("ssid").value ,
+            pswd:document.getElementById("pswd").value ,
+
+            ssid2:document.getElementById("ssid2").value ,
+            pswd2:document.getElementById("pswd2").value ,
+
+            address:document.getElementById("address").value ,
+            port:document.getElementById("port").value ,
+        }
+        console.log(config)
+        fetch('/service/saveConfiguration', {
+            method: 'POST',
+            body: JSON.stringify(config)
+        }).then(function(response) {
+            console.log(response);
+            alert('Configuration saved, please close browser')
+        });
+    }
+    function loadConfig() {
+        fetch('/service/readConfiguration', {
+            method: 'POST'
+        }).then(function(response) {
+            response.json().then(function(r) {
+                console.log('This is the parsed json', r);
+                console.log(r);
+                if(!(typeof r.ssid === 'undefined' || r.ssid === null) ) { document.getElementById("ssid").value =r.ssid; }
+                if(!(typeof r.pswd === 'undefined' || r.pswd === null) ) {document.getElementById("pswd").value=r.pswd; }
+                if(!(typeof r.ssid2 === 'undefined' || r.ssid2 === null) ) { document.getElementById("ssid2").value =r.ssid2; }
+                if(!(typeof r.pswd2 === 'undefined' || r.pswd2 === null) ) {document.getElementById("pswd2").value=r.pswd2; }
+                if(!(typeof r.address === 'undefined' || r.address === null) ) { document.getElementById("address").value =r.address; }
+                if(!(typeof r.port === 'undefined' || r.port === null) ) { document.getElementById("port").value =r.port; }
+            })
+        });
+    }
+    function updateAP(obj) {
+        var apList = document.getElementById("apList");
+        for(i=apList.rows.length -1;i > 0 ;i--){
+            apList.deleteRow(i)
+        }
+        for(i=0;i< obj.length;i++){
+            row = apList.insertRow(1);
+            row.setAttribute("id", obj[i].ssid);
+            row.onclick = function(){
+               var id = this.getAttribute("id");
+               document.getElementById("ssid").value  =id
+             };
+            var cell = row.insertCell(0);
+            cell.innerHTML=obj[i].auth;
+            cell = row.insertCell(0);
+            cell.innerHTML=obj[i].rssi;
+            cell = row.insertCell(0);
+            cell.innerHTML=obj[i].channel;
+            cell = row.insertCell(0);
+            cell.innerHTML=obj[i].ssid;
+
+        }
+    }
+    function statusTimer() {
+        var opts = { method: 'POST', headers: {} };
+        fetch('/service/listAP', opts).then(function (r) { return r.json();  })
+        .then(function (obj) {
+           updateAP(obj)
+        });
+    }
+    setInterval(statusTimer, 3000);
+    loadConfig();
+    </script>
+</body>
+<html>
