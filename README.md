@@ -5,7 +5,7 @@
 	<li>  allow a very young kid to control the laptop's microphone mute/unmute status without adult supervision</li>
 	<li>  visual feedback of the mute status is required</li>
     <li>  very simple to use</li>
-    <li>  Multiple buttons should control the same microphone (read: the parent has control as well)</li>
+    <li>  multiple buttons should control the same microphone (read: the parent has control as well)</li>
     <li>  no batteries</li>
 </p>
 
