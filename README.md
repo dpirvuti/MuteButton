@@ -49,5 +49,6 @@
 	<li>The STL and PLA GCODE for Creality Ender 3 is in the Case folder</li>
 
 <img src="https://raw.githubusercontent.com/dpirvuti/MuteButton/master/Case/top.png"  style="width:40%;text-align: center">
+<img src="https://raw.githubusercontent.com/dpirvuti/MuteButton/master/Case/bottom.png"  style="width:40%;text-align: center">
 </p>
 </p>
