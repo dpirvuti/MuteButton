@@ -1,1 +1,53 @@
-# MuteButton
+<p style="background-color: white;text-align: left;color: black;font-family: Arial, Helvetica, sans-serif;">
+<h1>Remote Mute button</h1>
+<p></p>
+<p>The ask:
+	<li>  allow a very young kid to control the laptop's microphone mute/unmute status without adult supervision</li>
+	<li>  visual feedback of the mute status is required</li>
+    <li>  very simple to use</li>
+    <li>  no batteries</li>
+</p>
+
+<p>This solution:
+	<li>use a ESP32 module, flashed with NodeMCU</li>
+	<li>a button connected to a GPIO input (pull up, GPIO12), and GND</li>
+    <li>a LED connected to a GPIO output (GPIO13), and GND</li>
+    <li>a java piece of code running on the machine to be controlled</li>
+    <li>WIFI connectivity is required and the target machine must be on the same network</li>
+    <img src="https://github.com/dpirvuti/MuteButton/blob/master/Case/Assembled.jpg?raw=true" style="width:20%;text-align: center;-webkit-transform: rotate(90deg);-moz-transform: rotate(90deg);-o-transform: rotate(90deg);-ms-transform: rotate(90deg);transform: rotate(90deg);" >
+    <img src="https://github.com/dpirvuti/MuteButton/blob/master/Case/Wiring1.jpg?raw=true" style="width:20%;text-align: center;-webkit-transform: rotate(90deg);-moz-transform: rotate(90deg);-o-transform: rotate(90deg);-ms-transform: rotate(90deg);transform: rotate(90deg);">
+    <img src="https://github.com/dpirvuti/MuteButton/blob/master/Case/Wiring2.jpg?raw=true" style="width:20%;text-align: center;-webkit-transform: rotate(90deg);-moz-transform: rotate(90deg);-o-transform: rotate(90deg);-ms-transform: rotate(90deg);transform: rotate(90deg);">
+</p>
+<p>The how:
+	<li>at startup, ESP32, connect to WIFI, joins a multicast group and publishes a initial 'query' message </li>
+	<li>the java code is running in background on the controlled machine, joins the same multicast group and responds with a 'state' message indicating the volume level</li>
+    <li>the ESP receives the response and turns on/off the connected LED. </li>
+    <li>pressing the button triggers the ESP to send a 'toggle' message, expecting a 'state' response that will also turn on/off the connected LED. </li>
+</p>
+
+<p>Java code:
+	<li>configuration is set in app.properties that needs to be on the classpath when running the app.</li>
+	<li>mcastPort/mcastAddress identifies the muticast group. These values must match the ESP32's configuration</li>
+    <li>pairedNodeID property is not mandatory, the code will only respond to the first device that comunicates with after startup. If set, this should be the the NodeMCU's chip id</li>
+    <li>useSystemValue property if set to true, the max microphone level is set by the user using the OS controls. If false, then the max microphone level is set to the value configured by 'maxInputValue' integer property</li>
+    <li>setCommand is (at this time) the OS command to set the microphone volume to a specific value, integer</li>
+    <li>getStateCommand - os command to retrieve the current microphone value. The output of this command should be a single line, integer value between 0 and 100, inclusive.
+</p>
+<p>ESP32 code:
+	<li>Configuration is set in wifi.conf file. At startup,if this file is missing, the device will enter the configuration mode, exposing a access point. Additionally, configuration mode can be entered by touching pad 3 during startup.</li>
+	<li>In configuration mode, a web interface will allow you to configure the primary(secondary) wifi network, multicast group info. During this phase, all avaliable access points are listed.</li>
+    <li>after the configuration is complete and WIFI network is joined, the ESP32 will join the multicast group and send a 'query' message indicating the chip id in the nodeDd field</li>
+    <li>the reply will cause the LED status to be updated accordingly</li>
+    <li>pressing the button will cause the ESP32 to send a 'toggle' message, to be followed by a reply</li>
+    <li>When no reply to a request is received, the LED will blink 5times/sec indicating a connectivity issue</li>
+    <li>the GPIOs, timeouts and various parameters are set in init.lua</li>
+    <li></li>
+    
+</p>
+
+<p>The case:
+	<li>The STL and PLA GCODE for Creality Ender 3 is in the Case folder</li>
+
+<img src="https://raw.githubusercontent.com/dpirvuti/MuteButton/master/Case/top.png"  style="width:40%;text-align: center">
+</p>
+</p>
